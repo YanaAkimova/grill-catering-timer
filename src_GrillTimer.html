@@ -1,0 +1,276 @@
+import React, { useState, useEffect } from 'react';
+import { Play, Pause, RotateCcw, Clock, Users, BookOpen, UtensilsCrossed } from 'lucide-react';
+
+const GrillTimer = () => {
+  const [activeTab, setActiveTab] = useState('timeline');
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [teamStatuses, setTeamStatuses] = useState({
+    ilya: 'подготовка к закускам',
+    anna: 'встреча гостей',
+    roman: 'координация'
+  });
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => {
+      setSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  const currentTime = 13 * 3600 + Math.floor(seconds / 1);
+  const hours = Math.floor(currentTime / 3600);
+  const mins = Math.floor((currentTime % 3600) / 60);
+  const displayTime = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+  const dishes = [
+    { name: '🥒 Закуски', start: 13 * 60, end: 13 * 60 + 20, items: 'Халлуми, кебабы, креветки, куриные шашлычки' },
+    { name: '🥗 Салат гриль', start: 14 * 60, end: 14 * 60 + 20, items: 'Гриль-говядина, рукола, груша, пармезан, гранат' },
+    { name: '🥩 Ribeye с овощами', start: 14 * 60 + 40, end: 15 * 60 + 15, items: 'Ribeye 300гр × 8, лук, морковь, цукини, баклажан' },
+    { name: '🍐 Груша на гриле', start: 15 * 60 + 30, end: 16 * 60, items: 'Груша × 4 со сливочным мороженым и грецкими орехами' }
+  ];
+
+  const currentMinutes = hours * 60 + mins;
+  const activeDishes = dishes.filter(d => currentMinutes >= d.start && currentMinutes < d.end);
+
+  const TimelineTab = () => (
+    <div className="space-y-4">
+      <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white p-6 rounded-lg text-center">
+        <div className="text-5xl font-bold font-mono mb-2">{displayTime}</div>
+        <div className="text-sm opacity-90">Текущее время (13:00–18:00)</div>
+      </div>
+
+      <div className="flex gap-2 justify-center">
+        <button
+          onClick={() => setIsRunning(!isRunning)}
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium"
+        >
+          {isRunning ? <Pause size={20} /> : <Play size={20} />}
+          {isRunning ? 'Пауза' : 'Старт'}
+        </button>
+        <button
+          onClick={() => { setSeconds(0); setIsRunning(false); }}
+          className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium"
+        >
+          <RotateCcw size={20} /> Сброс
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="font-bold text-lg text-gray-800">📅 Расписание подачи</h3>
+        {dishes.map((dish, idx) => {
+          const isActive = activeDishes.includes(dish);
+          return (
+            <div
+              key={idx}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                isActive
+                  ? 'border-orange-500 bg-orange-50 shadow-lg animate-pulse'
+                  : 'border-gray-200 bg-white'
+              }`}
+            >
+              <div className="font-bold text-lg mb-1">{dish.name}</div>
+              <div className="text-sm text-gray-600 mb-2">
+                {String(Math.floor(dish.start / 60)).padStart(2, '0')}:{
+                  String(dish.start % 60).padStart(2, '0')
+                } – {String(Math.floor(dish.end / 60)).padStart(2, '0')}:{
+                  String(dish.end % 60).padStart(2, '0')
+                }
+              </div>
+              <div className="text-sm text-gray-700">{dish.items}</div>
+              {isActive && (
+                <div className="mt-2 text-orange-600 font-bold text-sm animate-bounce">
+                  ⏰ ГОТОВИТСЯ ПРЯМО СЕЙЧАС!
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const TeamTab = () => (
+    <div className="space-y-4">
+      <h3 className="font-bold text-lg text-gray-800">👥 Команда онлайн</h3>
+      <div className="space-y-3">
+        <div className="p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+          <div className="font-bold text-green-800">👨‍🍳 Илья (шеф-повар)</div>
+          <div className="text-sm text-green-700 mt-1">Статус: {teamStatuses.ilya}</div>
+          <div className="text-xs text-green-600 mt-2">● онлайн</div>
+        </div>
+        <div className="p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+          <div className="font-bold text-blue-800">👩‍💼 Анна (банкетный менеджер)</div>
+          <div className="text-sm text-blue-700 mt-1">Статус: {teamStatuses.anna}</div>
+          <div className="text-xs text-blue-600 mt-2">● онлайн</div>
+        </div>
+        <div className="p-4 bg-purple-50 border-2 border-purple-300 rounded-lg">
+          <div className="font-bold text-purple-800">🎯 Роман (организатор)</div>
+          <div className="text-sm text-purple-700 mt-1">Статус: {teamStatuses.roman}</div>
+          <div className="text-xs text-purple-600 mt-2">● онлайн</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MenuTab = () => (
+    <div className="space-y-4">
+      <h3 className="font-bold text-lg text-gray-800">🍽️ Меню на 8 человек</h3>
+      <div className="space-y-3">
+        <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+          <div className="font-bold text-yellow-900">🥒 Закуски</div>
+          <div className="text-sm text-gray-700 mt-2">
+            <div>Подача: 13:00</div>
+            <div className="mt-1">Порции: 175 гр × 8 = 1,4 кг</div>
+            <div className="mt-2 text-gray-600">Халлуми, кебабы из овощей, креветки на гриле, куриные шашлычки</div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+          <div className="font-bold text-green-900">🥗 Салат гриль-говядина</div>
+          <div className="text-sm text-gray-700 mt-2">
+            <div>Подача: 14:00</div>
+            <div className="mt-1">Состав: Гриль-говядина (вырезка 50гр × 8 = 400гр), рукола, груша, пармезан, гранат</div>
+            <div className="mt-2 text-gray-600">Вырезка готовится rare (внутри розовая, 50–55°C)</div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+          <div className="font-bold text-red-900">🥩 Ribeye на гриле с овощами</div>
+          <div className="text-sm text-gray-700 mt-2">
+            <div>Подача: 14:40</div>
+            <div className="mt-1">Ribeye: 300 гр × 8 = 2,4 кг (medium-rare, 55–60°C)</div>
+            <div className="mt-1">Овощи: лук, морковь, цукини, баклажан карамелизированные</div>
+            <div className="mt-2 text-gray-600">С ароматным травяным маслом (масло + петрушка, чеснок, розмарин) и бальзамической глазурью</div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-orange-50 border-2 border-orange-300 rounded-lg">
+          <div className="font-bold text-orange-900">🍐 Груша на гриле с мороженым</div>
+          <div className="text-sm text-gray-700 mt-2">
+            <div>Подача: 15:30</div>
+            <div className="mt-1">Груша: 4 целые (для 8 человек — на двоих по половине груши)</div>
+            <div className="mt-1">С холодным сливочным мороженым и дробленными грецкими орехами</div>
+            <div className="mt-2 text-gray-600">Груша на гриле 3–5 минут до мягкости, затем порционируем</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const RecipesTab = () => (
+    <div className="space-y-4">
+      <h3 className="font-bold text-lg text-gray-800">👨‍🍳 Рецепты и инструкции</h3>
+      
+      <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+        <div className="font-bold text-lg mb-3">🥒 Закуски (13:00)</div>
+        <div className="text-sm space-y-2 text-gray-700">
+          <div><strong>Халлуми:</strong> 3–4 мин с каждой стороны при 200–220°C, до золотистой корочки</div>
+          <div><strong>Овощные кебабы:</strong> помидоры, перец, цукини — 4–5 мин, часто переворачивать</div>
+          <div><strong>Креветки:</strong> 2–3 мин с каждой стороны, пока не розовеют, не пережарить</div>
+          <div><strong>Куриные шашлычки:</strong> 6–8 мин при 180–200°C до 75°C внутри</div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+        <div className="font-bold text-lg mb-3">🥗 Салат гриль-говядина (14:00)</div>
+        <div className="text-sm space-y-2 text-gray-700">
+          <div><strong>Вырезка (400 гр сырая):</strong> 2–3 мин с каждой стороны при 220–240°C. Внутри должна остаться розовой (rare, 50–55°C)</div>
+          <div><strong>Сборка:</strong> вырезка нарезана тонкими ломтиками, рукола, ломтики груши, стружка пармезана, зёрна граната</div>
+          <div><strong>Заправка:</strong> оливковое масло, бальзамический уксус, соль, свежемолотый перец</div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+        <div className="font-bold text-lg mb-3">🥩 Ribeye с карамелизированными овощами (14:40)</div>
+        <div className="text-sm space-y-2 text-gray-700">
+          <div><strong>Ribeye (2,4 кг):</strong> 4–5 мин с каждой стороны при 230–250°C. Medium-rare: 55–60°C внутри. Надрез жира перед готовкой. Не добавлять масло!</div>
+          <div><strong>Овощи:</strong> лук, морковь, цукини, баклажан нарезать крупными ломтями, жарить 8–10 мин до мягкости и карамели</div>
+          <div><strong>Травяное масло:</strong> сливочное масло размягчить, смешать с мелко нарезанной петрушкой, чесноком и розмарином. Намазать на горячий Ribeye.</div>
+          <div><strong>Бальзамическая глазурь:</strong> бальзамический уксус восстановить на огне до сиропа, полить на блюдо</div>
+        </div>
+      </div>
+
+      <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
+        <div className="font-bold text-lg mb-3">🍐 Груша на гриле (15:30)</div>
+        <div className="text-sm space-y-2 text-gray-700">
+          <div><strong>Груша (4 целые):</strong> разрезать пополам вдоль, удалить сердцевину, смазать оливковым маслом</div>
+          <div><strong>Готовка:</strong> 3–5 мин срезом вниз при 200°C до мягкости и лёгких полос от гриля</div>
+          <div><strong>Подача:</strong> груша тёплая срезом вверх, в центр положить холодное мороженое, посыпать дробленными грецкими орехами</div>
+          <div><strong>Опционально:</strong> мёд или карамельный соус сверху</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100 p-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6 text-center">
+            <h1 className="text-3xl font-bold mb-1">🔥 Таймер кейтеринга</h1>
+            <p className="text-orange-100">26 апреля 2026 • Академия гриля • 13:00–18:00</p>
+          </div>
+
+          <div className="flex border-b border-gray-200 bg-gray-50">
+            <button
+              onClick={() => setActiveTab('timeline')}
+              className={`flex-1 py-3 px-4 font-medium border-b-2 transition ${
+                activeTab === 'timeline'
+                  ? 'border-orange-500 text-orange-600 bg-white'
+                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <Clock size={18} className="inline mr-2" /> Таймлайн
+            </button>
+            <button
+              onClick={() => setActiveTab('team')}
+              className={`flex-1 py-3 px-4 font-medium border-b-2 transition ${
+                activeTab === 'team'
+                  ? 'border-orange-500 text-orange-600 bg-white'
+                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <Users size={18} className="inline mr-2" /> Команда
+            </button>
+            <button
+              onClick={() => setActiveTab('menu')}
+              className={`flex-1 py-3 px-4 font-medium border-b-2 transition ${
+                activeTab === 'menu'
+                  ? 'border-orange-500 text-orange-600 bg-white'
+                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <UtensilsCrossed size={18} className="inline mr-2" /> Меню
+            </button>
+            <button
+              onClick={() => setActiveTab('recipes')}
+              className={`flex-1 py-3 px-4 font-medium border-b-2 transition ${
+                activeTab === 'recipes'
+                  ? 'border-orange-500 text-orange-600 bg-white'
+                  : 'border-transparent text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <BookOpen size={18} className="inline mr-2" /> Рецепты
+            </button>
+          </div>
+
+          <div className="p-6">
+            {activeTab === 'timeline' && <TimelineTab />}
+            {activeTab === 'team' && <TeamTab />}
+            {activeTab === 'menu' && <MenuTab />}
+            {activeTab === 'recipes' && <RecipesTab />}
+          </div>
+        </div>
+
+        <div className="text-center mt-6 text-sm text-gray-600">
+          <p>✓ Все участники видят одинаковое время</p>
+          <p>✓ Мобильный-friendly для работы на гриле</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GrillTimer;
