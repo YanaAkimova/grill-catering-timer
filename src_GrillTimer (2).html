@@ -1,0 +1,259 @@
+import { useState } from 'react'
+
+export default function GrillTimer() {
+  const [activeTab, setActiveTab] = useState('menu')
+  const [elapsed, setElapsed] = useState(0)
+
+  // Start timer
+  const startTimer = () => {
+    const interval = setInterval(() => {
+      setElapsed(prev => prev + 1)
+    }, 1000)
+    return interval
+  }
+
+  // Menu data
+  const menu = [
+    { id: 1, name: 'Закуски', temp: '80°C', time: '2-3 мин', difficulty: 'Низкая' },
+    { id: 2, name: 'Салат с вырезкой', temp: '85°C', time: '8-10 мин', difficulty: 'Средняя' },
+    { id: 3, name: 'Ribeye 300g', temp: '90°C', time: '10-12 мин', difficulty: 'Высокая' },
+    { id: 4, name: 'Груша на гриле', temp: '75°C', time: '4-5 мин', difficulty: 'Низкая' }
+  ]
+
+  // Team data
+  const team = [
+    { name: 'Илья', role: 'Шеф-повар', responsibility: 'Готовит на гриле' },
+    { name: 'Анна', role: 'Бankетный менеджер', responsibility: 'Координирует подачу' },
+    { name: 'Роман', role: 'Организатор', responsibility: 'Синхронизирует таймер' }
+  ]
+
+  // Recipes data
+  const recipes = {
+    1: 'Овощи и хлеб с маслом. Готовить 2-3 минуты на среднем жаре.',
+    2: 'Вырезка с салатными листьями. Готовить 8-10 минут при 85°C.',
+    3: 'Премиум стейк Ribeye 300g. Готовить 10-12 минут при 90°C, переворачивать каждые 2 минуты.',
+    4: 'Груша, разрезанная пополам. Готовить 4-5 минут при 75°C до мягкости.'
+  }
+
+  // Format time
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  return (
+    <div style={styles.container}>
+      <header style={styles.header}>
+        <h1 style={styles.title}>🔥 Grill Catering Timer</h1>
+        <div style={styles.timer}>{formatTime(elapsed)}</div>
+      </header>
+
+      <nav style={styles.nav}>
+        {['menu', 'timeline', 'team', 'recipes'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              ...styles.navBtn,
+              ...(activeTab === tab ? styles.navBtnActive : {})
+            }}
+          >
+            {tab === 'menu' && '📋 Menu'}
+            {tab === 'timeline' && '⏱️ Timeline'}
+            {tab === 'team' && '👥 Team'}
+            {tab === 'recipes' && '📖 Recipes'}
+          </button>
+        ))}
+      </nav>
+
+      <main style={styles.content}>
+        {activeTab === 'menu' && (
+          <div>
+            <h2>📋 Меню</h2>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th>Блюдо</th>
+                  <th>Температура</th>
+                  <th>Время</th>
+                  <th>Сложность</th>
+                </tr>
+              </thead>
+              <tbody>
+                {menu.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.name}</td>
+                    <td>{item.temp}</td>
+                    <td>{item.time}</td>
+                    <td>{item.difficulty}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'timeline' && (
+          <div>
+            <h2>⏱️ Расписание подачи</h2>
+            <div style={styles.timeline}>
+              <p>13:00 — Приготовление закусок</p>
+              <p>13:15 — Подача закусок</p>
+              <p>13:20 — Приготовление салата с вырезкой</p>
+              <p>13:30 — Подача салата</p>
+              <p>14:00 — Приготовление Ribeye</p>
+              <p>14:15 — Подача Ribeye</p>
+              <p>15:00 — Приготовление груши на гриле</p>
+              <p>15:10 — Подача груши (десерт)</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'team' && (
+          <div>
+            <h2>👥 Команда</h2>
+            <div style={styles.teamGrid}>
+              {team.map((member, idx) => (
+                <div key={idx} style={styles.teamCard}>
+                  <h3>{member.name}</h3>
+                  <p><strong>Роль:</strong> {member.role}</p>
+                  <p><strong>Ответственность:</strong> {member.responsibility}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'recipes' && (
+          <div>
+            <h2>📖 Рецепты</h2>
+            <div style={styles.recipesList}>
+              {menu.map((dish, idx) => (
+                <div key={dish.id} style={styles.recipeCard}>
+                  <h3>{dish.name}</h3>
+                  <p>{recipes[dish.id]}</p>
+                  <p style={styles.recipeParams}>
+                    🌡️ {dish.temp} | ⏱️ {dish.time} | 📊 {dish.difficulty}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer style={styles.footer}>
+        <p>Гриль-Кейтеринг | 26 апреля 2026 | Академия гриля</p>
+      </footer>
+    </div>
+  )
+}
+
+const styles = {
+  container: {
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '10px',
+    backgroundColor: '#f5f5f5',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  header: {
+    backgroundColor: '#2c2c2c',
+    color: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '20px',
+    textAlign: 'center'
+  },
+  title: {
+    margin: '0 0 10px 0',
+    fontSize: '24px'
+  },
+  timer: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#ff6b6b'
+  },
+  nav: {
+    display: 'flex',
+    gap: '10px',
+    marginBottom: '20px',
+    flexWrap: 'wrap'
+  },
+  navBtn: {
+    flex: '1',
+    minWidth: '100px',
+    padding: '10px',
+    backgroundColor: '#fff',
+    border: '2px solid #ddd',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'all 0.3s'
+  },
+  navBtnActive: {
+    backgroundColor: '#ff6b6b',
+    color: '#fff',
+    borderColor: '#ff6b6b'
+  },
+  content: {
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    flex: 1,
+    marginBottom: '20px'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '15px'
+  },
+  timeline: {
+    backgroundColor: '#f9f9f9',
+    padding: '15px',
+    borderRadius: '6px',
+    borderLeft: '4px solid #ff6b6b'
+  },
+  teamGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '15px',
+    marginTop: '15px'
+  },
+  teamCard: {
+    backgroundColor: '#f0f0f0',
+    padding: '15px',
+    borderRadius: '6px',
+    border: '1px solid #ddd'
+  },
+  recipesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
+    marginTop: '15px'
+  },
+  recipeCard: {
+    backgroundColor: '#f9f9f9',
+    padding: '15px',
+    borderRadius: '6px',
+    borderLeft: '4px solid #ff6b6b'
+  },
+  recipeParams: {
+    fontSize: '12px',
+    color: '#666',
+    marginTop: '10px'
+  },
+  footer: {
+    backgroundColor: '#2c2c2c',
+    color: '#fff',
+    textAlign: 'center',
+    padding: '15px',
+    borderRadius: '8px',
+    fontSize: '12px'
+  }
+}
